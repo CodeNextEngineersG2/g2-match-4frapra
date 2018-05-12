@@ -22,7 +22,7 @@ var spriteX, spriteY;
 var flipSound, matchSound, nopeSound, winSound, loseSound, bgMusic;
 
 // game variables
-var firstSprite, secondSprite;
+var firstChoice, secondChoice;
 var lives, matches;
 var spritesActive;
 
@@ -124,6 +124,8 @@ function preload() {
    shuffle(spriteArray, true);
    placeSprites();
    spritesActive = true;
+   matches = 0;
+   lives = 5;
  }
 
 
@@ -262,16 +264,16 @@ function resizeImages() {
 function activateSprite(s) {
   s.onMousePressed = function() {
     if(spritesActive && s.animation.getFrame() !== s.animation.getLastFrame()){
-      if(firstSprite === undefined) {
-        firstSprite = s;
+      if(firstChoice === undefined) {
+        firstChoice = s;
         // flipSound.play();
         s.animation.goToFrame(s.animation.getLastFrame());
       }
-      else if(s !== firstSprite) {
-        secondSprite = s;
+      else if(s !== firstChoice) {
+        secondChoice = s;
         //flipSound.play();
         s.animation.goToFrame(s.animation.getLastFrame());
-
+        checkMatch();
       }
     }
   }
@@ -292,11 +294,65 @@ function activateSprite(s) {
  * reset and try again with a fresh shuffle.
  */
 
+function checkMatch(){
+  var boltMatch = (firstChoice === boltSprite1 && secondChoice === boltSprite2) ||
+                  (firstChoice === boltSprite2 && secondChoice === boltSprite1);
+  var cloudMatch = (firstChoice === cloudSprite1 && secondChoice === cloudSprite2) ||
+                   (firstChoice === cloudSprite2 && secondChoice === cloudSprite1);
+  var sunMatch = (firstChoice === sunSprite1 && secondChoice === sunSprite2) ||
+                  (firstChoice === sunSprite2 && secondChoice === sunSprite1);
+  var moonMatch = (firstChoice === moonSprite1 && secondChoice === moonSprite2) ||
+                  (firstChoice === moonSprite2 && secondChoice === moonSprite1);
+  var smileyMatch = (firstChoice === smileySprite1 && secondChoice === smileySprite2) ||
+                    (firstChoice === smileySprite2 && secondChoice === smileySprite1);
+  var heartMatch = (firstChoice === heartSprite1 && secondChoice === heartSprite2) ||
+                   (firstChoice === heartSprite2 && secondChoice === heartSprite1);
+  //if they did get a match
+  if(boltMatch || cloudMatch || sunMatch || moonMatch || smileyMatch || heartMatch) {
+    matches++;
+    if(matches === spriteArray.length / 2){
+      alert("YOU WON! LETS SEE IF YOU CAN WIN AGAIN.")
+      spritesActive = false;
+    }
+    else {
+      alert("Match!");
+      firstChoice = undefined;
+      secondChoice = undefined;
+    }
+  }
+  //if they didm't get a match
+  else{
+    lives--;
+    spritesActive = false;
+    if( lives === 0) {
+      setTimeout(function() {
+        alert("Game Over!");
+        //flipAllSprites();
+      }, 2000);
+    }
+    else {
+      setTimeout(function() {
+        alert("no match! Lives Left:" + lives);
+        firstChoice.animation.goToFrame(0);
+        secondChoice.animation.goToFrame(0);
+        firstChoice = undefined;
+        secondChoice = undefined;
+        spritesActive = true;
+      }, 2000);
+    }
+  }
+}
 /*
  * function flipAllSprites()
  * Flips all sprites in spriteArray to their last animation frame (i.e.,
  * "face-up").
  */
+function flipAllSprites() {
+  for(var i = 0; i < spriteArray.length; i++) {
+    var lastframe = spriteArray[i].animation.getLastFrame();
+    spriteArray[i].animation.goToFrame(LastFrame);
+  }
+}
 
  /*
   * function resetAllSprites()
